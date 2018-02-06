@@ -1,24 +1,32 @@
 import sys
-from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QUrl
-from PyQt4.QtWebKit import QWebPage
 import bs4 as bs
 import urllib.request
+from PyQt5.QtWebEngineWidgets import QWebEnginePage
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QUrl
 
-class Client(QWebPage):
+class Page(QWebEnginePage):
     def __init__(self, url):
         self.app = QApplication(sys.argv)
-        QWebPage.__init__(self)
-        self.loadFinished.connect(self.on_page_load)
-        self.mainFrame().load(QUrl(url))
+        QWebEnginePage.__init__(self)
+        self.html = ''
+        self.loadFinished.connect(self._on_load_finished)
+        self.load(QUrl(url))
         self.app.exec_()
 
-    def on_page_load(self):
+    def _on_load_finished(self):
+        self.html = self.toHtml(self.Callable)
+
+    def Callable(self, html_str):
+        self.html = html_str
         self.app.quit()
 
-url = 'https://developers.google.com/speed/pagespeed/insights/?url=apparat-fortuna.ru&tab=mobile'
-client_response = Client(url)
-source = client_response.mainFrame().toHtml()
-soup = bs.BeautifulSoup(source, 'lxml')
-test = soup.find('p', class_='speed-report-card-score')
-print(test)
+def main():
+    page = Page('https://developers.google.com/speed/pagespeed/insights/?url=apparat-finlandia.ru&tab=mobile')
+    soup = bs.BeautifulSoup(page.html, 'html.parser')
+    test = soup.find('p', class_='speed-report-card-score')
+    print(test.text)
+
+if __name__ == '__main__':
+    main()
+
